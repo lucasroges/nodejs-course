@@ -5,10 +5,11 @@ class Rect {
 
     constructor(x: number, y: number) {
         if (x <= 0 || y <= 0) {
-            throw new Error("Rectangle dimensions should be greater than zero.");
+            throw new Error(`Rectangle dimensions should be greater than zero. Dimensions: ${x} and ${y}`);
         }
         this.x = x;
         this.y = y;
+        console.log(`Rectangle created. Dimensions: ${x} and ${y}`);
     }
 
     perimeter = () => (2 * (this.x + this.y))
