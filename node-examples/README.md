@@ -6,3 +6,4 @@ Project from the 1st week in the
 Concepts:
 
 * Node modules
+* Callbacks and error handling
