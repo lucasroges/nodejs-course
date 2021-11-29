@@ -1,2 +1,2 @@
 *.pdf
-node-examples/node_modules
+*/node_modules
