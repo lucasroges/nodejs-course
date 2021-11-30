@@ -1,0 +1,34 @@
+import bodyParser from 'body-parser'
+import express from 'express'
+import { createServer } from 'http'
+import morgan from 'morgan'
+
+import { dishes } from './routes/dishes'
+import { promotions } from './routes/promotions'
+import { leaders } from './routes/leaders'
+
+const HOSTNAME = 'localhost'
+const PORT = 3000
+
+const app = express()
+app.use(morgan('dev'))
+app.use(bodyParser.json())
+
+app.use('/dishes', dishes)
+app.use('/promotions', promotions)
+app.use('/leaders', leaders)
+
+app.use(express.static(`${__dirname}/public`))
+
+app.use( (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    res.statusCode = 200
+    res.setHeader('Content-Type', 'text/html')
+    res.end('<html><body><h1>This is an express server</h1></body></html>')
+})
+
+const server = createServer(app)
+
+server.listen(PORT, HOSTNAME, () => {
+    console.log(`Server listening on ${PORT}`)
+})
+
