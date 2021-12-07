@@ -1,5 +1,6 @@
 import { MongoClient } from 'mongodb'
 import assert from 'assert'
+import { insertDocument, findDocuments, removeDocument, updateDocument } from './operations'
 
 const URL = 'mongodb://localhost:27017/'
 const DBNAME = 'conFusion'
@@ -11,29 +12,16 @@ MongoClient.connect(URL, (err: any, client: any) => {
     console.log('Successfully connected to the server')
 
     const db = client.db(DBNAME)
-    const collection = db.collection('dishes')
 
     const doc = {
-        "name": "Uthappizza",
-        "description": "just a regular pizza"
+        "name": "Mozzarella Pizza",
+        "description": "Cheese pizza"
     }
 
-    collection.insertOne(doc, (err: any, result: any) => {
-        assert.equal(err, null)
+    insertDocument(db, 'dishes', doc, (result: any) => {
+        console.log(result)
 
-        console.log(result.acknowledged ? `Data successfully inserted into the collection with _id ${result.insertedId}` : `Error inserting data into the collection`)
-
-        collection.find({}).toArray((err: any, result: any) => {
-            assert.equal(err, null)
-
-            console.log(`Found:`)
-            console.log(result)
-
-            db.dropCollection('dishes', (err: any, result: any) => {
-                assert.equal(err, null)
-
-                client.close()
-            })
-        })
+        client.close()
     })
+
 })
