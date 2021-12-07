@@ -1,0 +1,19 @@
+{
+  "name": "node-mongoose",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "ts-node index.ts"
+  },
+  "author": "Lucas Roges",
+  "license": "ISC",
+  "devDependencies": {
+    "typescript": "^4.5.2"
+  },
+  "dependencies": {
+    "mongoose": "^6.1.0",
+    "ts-node": "^10.4.0"
+  }
+}
