@@ -1,45 +1,30 @@
 import assert from 'assert'
 import { MongoClient, Db } from 'mongodb'
 
-export const insertDocument = (db: Db, collection: string, document: object, callback: Function) => {
-    const coll = db.collection(collection)
+export const insertDocument = async (db: Db, collection: string, document: object): Promise<any> => {
+    const coll = await db.collection(collection)
 
-    coll.insertOne(document, (err: any, result: any) => {
-        assert.equal(err, null)
-        
-        console.log(`Inserted with _id ${result.insertedId}`)
-        callback(result)
-    })
+    const insertedDocument = await coll.insertOne(document)
+    return insertedDocument
 }
 
-export const findDocuments = (db: Db, collection: string, callback: Function) => {
-    const coll = db.collection(collection)
-    
-    coll.find({}).toArray((err: any, documents: any) => {
-        assert.equal(err, null)
+export const findDocuments = async (db: Db, collection: string): Promise<any> => {
+    const coll = await db.collection(collection)
 
-        callback(documents)
-    })
-
+    const documents = await coll.find({}).toArray()
+    return documents
 }
 
-export const removeDocument = (db: Db, collection: string, document: object, callback: Function) => {
-    const coll = db.collection(collection)
+export const removeDocument = async (db: Db, collection: string, document: object): Promise<any> => {
+    const coll = await db.collection(collection)
 
-    coll.deleteOne(document, (err: any, result: any) => {
-        assert.equal(err, null)
-
-        console.log(`Removed the document ${document}`)
-        callback(result)
-    })
+    const deletedDocument = await coll.deleteOne(document)
+    return deletedDocument
 }
 
-export const updateDocument = (db: Db, collection: string, document: object, updatedDocument: object, callback: Function) => {
-    const coll = db.collection(collection)
+export const updateDocument = async (db: Db, collection: string, document: object, newDocument: object): Promise<any> => {
+    const coll = await db.collection(collection)
 
-    coll.updateOne(document, {}, {}, (err: any, result: any) => {
-        assert.equal(err, null)
-        
-        callback(result)
-    })
+    const updatedDocument = await coll.findOneAndUpdate(document, { $set: newDocument })
+    return updatedDocument
 }
