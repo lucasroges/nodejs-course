@@ -10,6 +10,22 @@ import { dishes } from './routes/dishes'
 import { promotions } from './routes/promotions'
 import { leaders } from './routes/leaders'
 
+import { connect } from 'mongoose'
+
+import { Dishes } from './models/dishes'
+
+const URL = 'mongodb://localhost:27017/conFusion'
+
+const connection = connect(URL)
+connection.then(
+  (db) => {
+    console.log(`Successfully connected to ${URL}`)
+  }, (err) => {
+    throw new Error(err)
+  }
+)
+
+
 export const app = express();
 
 // view engine setup
@@ -29,12 +45,12 @@ app.use('/promotions', promotions)
 app.use('/leaders', leaders)
 
 // catch 404 and forward to error handler
-app.use( (req: express.Request, res: express.Response, next: express.NextFunction) => {
+app.use((req: express.Request, res: express.Response, next: express.NextFunction) => {
   next(createError(404));
 });
 
 // error handler
-app.use( (err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
   // set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};
