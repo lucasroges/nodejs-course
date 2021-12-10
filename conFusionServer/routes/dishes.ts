@@ -30,7 +30,8 @@ dishes.route('/')
             const createdDish = await Dishes.create(dish)
             const message = `Dish ${dish.name} was created!`
             const response = {
-                message
+                message,
+                createdDish
             }
             res.statusCode = 200
             res.setHeader('Content-Type', 'application/json')
@@ -63,17 +64,16 @@ dishes.route('/:dishId')
         try {
             const dishId = req.params.dishId
             const dish = await Dishes.findById(dishId)
-            const hasDish = !!dish
-            if (hasDish) {
-                const message = `Dish ${dishId} found!`
-                const response = {
-                    message,
-                    dishes
-                }
-                res.statusCode = 200
-                res.json(response)
+            if (!dish) {
+                notFoundHandler(dishId, res)
             }
-            notFoundHandler(dishId, res)
+            const message = `Dish ${dishId} found!`
+            const response = {
+                message,
+                dishes
+            }
+            res.statusCode = 200
+            res.json(response)
         } catch (err) {
             errorHandler(err, res)
         }
@@ -89,17 +89,16 @@ dishes.route('/:dishId')
             const updatedDish = await Dishes.findByIdAndUpdate(dishId, {
                 $set: dishUpdatedParams
             }, { new: true })
-            const hasDish = !!updatedDish
-            if (hasDish) {
-                const message = `Dish ${dishId} updated!`
-                const response = {
-                    message,
-                    updatedDish
-                }
-                res.statusCode = 200
-                res.json(response)
+            if (!updatedDish) {
+                notFoundHandler(dishId, res)
             }
-            notFoundHandler(dishId, res)
+            const message = `Dish ${dishId} updated!`
+            const response = {
+                message,
+                updatedDish
+            }
+            res.statusCode = 200
+            res.json(response)
         } catch (err) {
             errorHandler(err, res)
         }
@@ -108,16 +107,15 @@ dishes.route('/:dishId')
         try {
             const dishId = req.params.dishId
             const deletedDish = await Dishes.findByIdAndDelete(dishId)
-            const hasDish = !!deletedDish
-            if (hasDish) {
-                const message = `Dish ${dishId} deleted!`
-                const response = {
-                    message
-                }
-                res.statusCode = 200
-                res.json(response)
+            if (!deletedDish) {
+                notFoundHandler(dishId, res)
             }
-            notFoundHandler(dishId, res)
+            const message = `Dish ${dishId} deleted!`
+            const response = {
+                message
+            }
+            res.statusCode = 200
+            res.json(response)
         } catch (err) {
             errorHandler(err, res)
         }
