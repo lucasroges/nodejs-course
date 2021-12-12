@@ -35,21 +35,32 @@ app.set('view engine', 'jade')
 app.use(logger('dev'))
 app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
-app.use(cookieParser())
+
+app.use(cookieParser('0d95ec4dcfe25c21a72745f33a13b00e'))
 
 const auth = (req: Request, res: Response, next: NextFunction) => {
-  const { authorization } = req.headers
-  if (!authorization) {
+  const { user } = req.signedCookies
+  if (!user) {
+    const { authorization } = req.headers
+    if (!authorization) {
+      return unauthorizedHandler(res)
+    }
+
+    const [username, password] = Buffer.from(authorization.split(' ')[1], 'base64').toString().split(':')
+
+    if (username !== 'admin' || password !== 'password') {
+      return unauthorizedHandler(res)
+    }
+
+    res.cookie('user', 'admin', { signed: true })
+    return next()
+  }
+
+  if (user !== 'admin') {
     return unauthorizedHandler(res)
   }
 
-  const [username, password] = Buffer.from(authorization.split(' ')[1], 'base64').toString().split(':')
-
-  if (username !== 'admin' || password !== 'password') {
-    return unauthorizedHandler(res)
-  }
-
-  next()
+  return next()
 }
 app.use(auth)
 
