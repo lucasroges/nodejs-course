@@ -1,5 +1,5 @@
 import createError from 'http-errors'
-import express from 'express'
+import express, { Request, Response, NextFunction } from 'express'
 import path from 'path'
 import cookieParser from 'cookie-parser'
 import logger from 'morgan'
@@ -12,7 +12,7 @@ import { leaders } from './routes/leaders'
 
 import { connect } from 'mongoose'
 
-import { Dishes } from './models/dishes'
+import { unauthorizedHandler } from './handlers'
 
 const URL = 'mongodb://localhost:27017/conFusion'
 
@@ -26,36 +26,53 @@ connection.then(
 )
 
 
-export const app = express();
+export const app = express()
 
 // view engine setup
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'jade');
+app.set('views', path.join(__dirname, 'views'))
+app.set('view engine', 'jade')
 
-app.use(logger('dev'));
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(logger('dev'))
+app.use(express.json())
+app.use(express.urlencoded({ extended: false }))
+app.use(cookieParser())
 
-app.use('/', indexRouter);
-app.use('/users', users);
+const auth = (req: Request, res: Response, next: NextFunction) => {
+  const { authorization } = req.headers
+  if (!authorization) {
+    return unauthorizedHandler(res)
+  }
+
+  const [username, password] = Buffer.from(authorization.split(' ')[1], 'base64').toString().split(':')
+
+  if (username !== 'admin' || password !== 'password') {
+    return unauthorizedHandler(res)
+  }
+
+  next()
+}
+app.use(auth)
+
+app.use(express.static(path.join(__dirname, 'public')))
+
+app.use('/', indexRouter)
+app.use('/users', users)
 app.use('/dishes', dishes)
 app.use('/promotions', promotions)
 app.use('/leaders', leaders)
 
 // catch 404 and forward to error handler
-app.use((req: express.Request, res: express.Response, next: express.NextFunction) => {
-  next(createError(404));
+app.use((req: Request, res: Response, next: NextFunction) => {
+  next(createError(404))
 });
 
 // error handler
-app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   // set locals, only providing error in development
-  res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
+  res.locals.message = err.message
+  res.locals.error = req.app.get('env') === 'development' ? err : {}
 
   // render the error page
-  res.status(err.status || 500);
-  res.render('error');
+  res.status(err.status || 500)
+  res.render('error')
 });
