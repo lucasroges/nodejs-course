@@ -2,7 +2,7 @@ import bodyParser from 'body-parser'
 import express, { Router } from 'express'
 import { } from 'mongoose'
 import { Promotions } from '../models'
-import { errorHandler, notFoundHandler, validationErrorHandler } from '../handlers'
+import { errorHandler, httpResponseHandler, validationErrorHandler } from '../handlers'
 
 export const promotions = Router()
 
@@ -65,7 +65,7 @@ promotions.route('/:promotionId')
             const { promotionId } = req.params
             const promotion = await Promotions.findById(promotionId)
             if (!promotion) {
-                notFoundHandler('Promotion', promotionId, res)
+                httpResponseHandler(res, 404, `Promotion ${promotionId} not found!`)
             }
             const message = `Promotion ${promotionId} found!`
             const response = {
@@ -91,7 +91,7 @@ promotions.route('/:promotionId')
                 $set: promotionUpdatedParams
             }, { new: true })
             if (!updatedPromotion) {
-                notFoundHandler('Promotion', promotionId, res)
+                httpResponseHandler(res, 404, `Promotion ${promotionId} not found!`)
             }
             const message = `Promotion ${promotionId} updated!`
             const response = {
@@ -109,7 +109,7 @@ promotions.route('/:promotionId')
             const { promotionId } = req.params
             const deletedPromotion = await Promotions.findByIdAndDelete(promotionId)
             if (!deletedPromotion) {
-                notFoundHandler('Promotion', promotionId, res)
+                httpResponseHandler(res, 404, `Promotion ${promotionId} not found!`)
             }
             const message = `Promotion ${promotionId} deleted!`
             const response = {

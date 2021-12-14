@@ -2,7 +2,7 @@ import bodyParser from 'body-parser'
 import express, { Router } from 'express'
 import { } from 'mongoose'
 import { Dishes } from '../models'
-import { errorHandler, notFoundHandler, validationErrorHandler } from '../handlers'
+import { errorHandler, httpResponseHandler, validationErrorHandler } from '../handlers'
 
 export const dishes = Router()
 
@@ -65,7 +65,7 @@ dishes.route('/:dishId')
             const { dishId } = req.params
             const dish = await Dishes.findById(dishId)
             if (!dish) {
-                notFoundHandler('Dish', dishId, res)
+                httpResponseHandler(res, 404, `Dish ${dishId} not found!`)
             }
             const message = `Dish ${dishId} found!`
             const response = {
@@ -91,7 +91,7 @@ dishes.route('/:dishId')
                 $set: dishUpdatedParams
             }, { new: true })
             if (!updatedDish) {
-                notFoundHandler('Dish', dishId, res)
+                httpResponseHandler(res, 404, `Dish ${dishId} not found!`)
             }
             const message = `Dish ${dishId} updated!`
             const response = {
@@ -109,7 +109,7 @@ dishes.route('/:dishId')
             const { dishId } = req.params
             const deletedDish = await Dishes.findByIdAndDelete(dishId)
             if (!deletedDish) {
-                notFoundHandler('Dish', dishId, res)
+                httpResponseHandler(res, 404, `Dish ${dishId} not found!`)
             }
             const message = `Dish ${dishId} deleted!`
             const response = {
@@ -128,7 +128,7 @@ dishes.route('/:dishId/comments')
             const { dishId } = req.params
             const dish = await Dishes.findById(dishId)
             if (!dish) {
-                notFoundHandler('Dish', dishId, res)
+                httpResponseHandler(res, 404, `Dish ${dishId} not found!`)
             }
             const comments = dish.comments
             const message = `Dish ${dishId} found with ${comments.length} comments!`
@@ -147,7 +147,7 @@ dishes.route('/:dishId/comments')
             const { dishId } = req.params
             const dish = await Dishes.findById(dishId)
             if (!dish) {
-                notFoundHandler('Dish', dishId, res)
+                httpResponseHandler(res, 404, `Dish ${dishId} not found!`)
             }
             const comment = req.body
             dish.comments.push(comment)
@@ -174,7 +174,7 @@ dishes.route('/:dishId/comments')
             const { dishId } = req.params
             const dish = await Dishes.findById(dishId)
             if (!dish) {
-                notFoundHandler('Dish', dishId, res)
+                httpResponseHandler(res, 404, `Dish ${dishId} not found!`)
             }
             dish.comments = []
             const updatedDish = await dish.save()
@@ -197,11 +197,11 @@ dishes.route('/:dishId/comments/:commentId')
             const { dishId, commentId } = req.params
             const dish = await Dishes.findById(dishId)
             if (!dish) {
-                notFoundHandler('Dish', dishId, res)
+                httpResponseHandler(res, 404, `Dish ${dishId} not found!`)
             }
             const comment = dish.comments.if(commentId)
             if (!comment) {
-                notFoundHandler('Comment', commentId, res)
+                httpResponseHandler(res, 404, `Comment ${commentId} not found!`)
             }
             const message = `Comment ${comment} inside dish ${dishId} found!`
             const response = {
@@ -224,11 +224,11 @@ dishes.route('/:dishId/comments/:commentId')
             const { dishId, commentId } = req.params
             const dish = await Dishes.findByIdAndUpdate(dishId)
             if (!dish) {
-                notFoundHandler('Dish', dishId, res)
+                httpResponseHandler(res, 404, `Dish ${dishId} not found!`)
             }
             const comment = dish.comments.id(commentId)
             if (!comment) {
-                notFoundHandler('Comment', commentId, res)
+                httpResponseHandler(res, 404, `Comment ${commentId} not found!`)
             }
             if (req.body.rating) {
                 dish.comments.id(commentId).rating = req.body.rating
@@ -253,11 +253,11 @@ dishes.route('/:dishId/comments/:commentId')
             const { dishId, commentId } = req.params
             const dish = await Dishes.findByIdAndUpdate(dishId)
             if (!dish) {
-                notFoundHandler('Dish', dishId, res)
+                httpResponseHandler(res, 404, `Dish ${dishId} not found!`)
             }
             const comment = dish.comments.id(commentId)
             if (!comment) {
-                notFoundHandler('Comment', commentId, res)
+                httpResponseHandler(res, 404, `Comment ${commentId} not found!`)
             }
             dish.comments.id(commentId).remove()
             const updatedDish = await dish.save()

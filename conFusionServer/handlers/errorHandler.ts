@@ -1,8 +1,7 @@
 import { Response } from 'express'
+import { httpResponseHandler } from './'
 
 export const errorHandler = (error: any, res: Response) => {
     console.log(error)
-    res.statusCode = 500
-    res.setHeader('Content-Type', 'text/plain')
-    res.end('Internal Server Error')
+    httpResponseHandler(res, 500, 'Internal Server Error')
 }

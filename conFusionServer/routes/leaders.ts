@@ -2,7 +2,7 @@ import bodyParser from 'body-parser'
 import express, { Router } from 'express'
 import { } from 'mongoose'
 import { Leaders } from '../models'
-import { errorHandler, notFoundHandler, validationErrorHandler } from '../handlers'
+import { errorHandler, httpResponseHandler, validationErrorHandler } from '../handlers'
 
 export const leaders = Router()
 
@@ -65,7 +65,7 @@ leaders.route('/:leaderId')
             const { leaderId } = req.params
             const leader = await Leaders.findById(leaderId)
             if (!leader) {
-                notFoundHandler('Leader', leaderId, res)
+                httpResponseHandler(res, 404, `Leader ${leaderId} not found!`)
             }
             const message = `Leader ${leaderId} found!`
             const response = {
@@ -91,7 +91,7 @@ leaders.route('/:leaderId')
                 $set: leaderUpdatedParams
             }, { new: true })
             if (!updatedLeader) {
-                notFoundHandler('Leader', leaderId, res)
+                httpResponseHandler(res, 404, `Leader ${leaderId} not found!`)
             }
             const message = `Leader ${leaderId} updated!`
             const response = {
@@ -109,7 +109,7 @@ leaders.route('/:leaderId')
             const { leaderId } = req.params
             const deletedLeader = await Leaders.findByIdAndDelete(leaderId)
             if (!deletedLeader) {
-                notFoundHandler('Leader', leaderId, res)
+                httpResponseHandler(res, 404, `Leader ${leaderId} not found!`)
             }
             const message = `Leader ${leaderId} deleted!`
             const response = {

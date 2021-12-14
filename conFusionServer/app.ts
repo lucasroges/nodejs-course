@@ -3,6 +3,7 @@ import express, { Request, Response, NextFunction } from 'express'
 import path from 'path'
 import cookieParser from 'cookie-parser'
 import logger from 'morgan'
+import session from 'express-session'
 
 import { indexRouter } from './routes/index'
 import { users } from './routes/users'
@@ -12,7 +13,7 @@ import { leaders } from './routes/leaders'
 
 import { connect } from 'mongoose'
 
-import { unauthorizedHandler } from './handlers'
+import { httpResponseHandler } from './handlers'
 
 const URL = 'mongodb://localhost:27017/conFusion'
 
@@ -24,7 +25,6 @@ connection.then(
     throw new Error(err)
   }
 )
-
 
 export const app = express()
 
@@ -38,26 +38,28 @@ app.use(express.urlencoded({ extended: false }))
 
 app.use(cookieParser('0d95ec4dcfe25c21a72745f33a13b00e'))
 
+app.use(session({
+  name: 'session-id',
+  secret: '0d95ec4dcfe25c21a72745f33a13b00e',
+  saveUninitialized: false,
+  resave: false
+}))
+
+app.use('/', indexRouter)
+app.use('/users', users)
+
 const auth = (req: Request, res: Response, next: NextFunction) => {
-  const { user } = req.signedCookies
-  if (!user) {
-    const { authorization } = req.headers
-    if (!authorization) {
-      return unauthorizedHandler(res)
-    }
-
-    const [username, password] = Buffer.from(authorization.split(' ')[1], 'base64').toString().split(':')
-
-    if (username !== 'admin' || password !== 'password') {
-      return unauthorizedHandler(res)
-    }
-
-    res.cookie('user', 'admin', { signed: true })
-    return next()
+  if (!req.session) {
+    return httpResponseHandler(res, 401, 'You are not authenticated')
   }
 
-  if (user !== 'admin') {
-    return unauthorizedHandler(res)
+  const { user } = req.session
+  if (!user) {
+    return httpResponseHandler(res, 401, 'You are not authenticated')
+  }
+
+  if (user !== 'authenticated') {
+    return httpResponseHandler(res, 401, 'You are not authenticated')
   }
 
   return next()
@@ -66,8 +68,6 @@ app.use(auth)
 
 app.use(express.static(path.join(__dirname, 'public')))
 
-app.use('/', indexRouter)
-app.use('/users', users)
 app.use('/dishes', dishes)
 app.use('/promotions', promotions)
 app.use('/leaders', leaders)
