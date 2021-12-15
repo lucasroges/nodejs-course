@@ -1,4 +1,4 @@
-const httpResponseHandler = (res, status, message, data) => {
+const httpResponseHandler = (res, status, message, data = {}) => {
     res.statusCode = status
     res.setHeader('Content-Type', 'application/json')
     if (status === 401) {

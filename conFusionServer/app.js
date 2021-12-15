@@ -1,10 +1,7 @@
 const express = require('express')
 const createError = require('http-errors')
 const path = require('path')
-const cookieParser = require('cookie-parser')
 const logger = require('morgan')
-const session = require('express-session')
-const FileStore = require('session-file-store')(session)
 const mongoose = require('mongoose')
 const passport = require('passport')
 
@@ -17,9 +14,10 @@ const leaders = require('./routes/leaders')
 const httpResponseHandler = require('./handlers/httpResponseHandler')
 
 const authenticate = require('./authenticate')
+const config = require('./config')
 
-const URL = 'mongodb://localhost:27017/conFusion'
-const secret = '0d95ec4dcfe25c21a72745f33a13b00e'
+const URL = config.mongoUrl
+const secret = config.secretKey
 
 const connection = mongoose.connect(URL)
 connection.then(
@@ -40,32 +38,10 @@ app.use(logger('dev'))
 app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
 
-//app.use(cookieParser(secret))
-
-app.use(session({
-  name: 'session-id',
-  secret,
-  saveUninitialized: false,
-  resave: false,
-  store: new FileStore()
-}))
-
 app.use(passport.initialize())
-app.use(passport.session())
 
 app.use('/', indexRouter)
 app.use('/users', users)
-
-const auth = (req, res, next) => {
-  const { user } = req
-
-  if (!user) {
-    return httpResponseHandler(res, 401, 'You are not authenticated')
-  }
-
-  return next()
-}
-app.use(auth)
 
 app.use(express.static(path.join(__dirname, 'public')))
 

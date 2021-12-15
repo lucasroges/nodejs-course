@@ -1,10 +1,14 @@
 const bodyParser = require('body-parser')
 const express = require('express')
 const mongoose = require('mongoose')
+
 const Promotions = require('../models/promotions')
+
 const errorHandler = require('../handlers/errorHandler')
 const validationErrorHandler = require('../handlers/validationErrorHandler')
 const httpResponseHandler = require('../handlers/httpResponseHandler')
+
+const authenticate = require('../authenticate')
 
 const promotions = express.Router()
 
@@ -15,29 +19,17 @@ promotions.route('/')
         try {
             const promotions = await Promotions.find({})
             const message = promotions ? `${promotions.length} promotions found!` : 'No promotions found!'
-            const response = {
-                message,
-                promotions
-            }
-            res.statusCode = 200
-            res.setHeader('Content-Type', 'application/json')
-            res.json(response)
+            httpResponseHandler(res, 200, message, promotions)
         } catch (err) {
             errorHandler(err, res)
         }
     })
-    .post(async (req, res) => {
+    .post(authenticate.verifyUser, async (req, res) => {
         try {
             const promotion = req.body
             const createdPromotion = await Promotions.create(promotion)
             const message = `Promotion ${promotion.name} was created!`
-            const response = {
-                message,
-                createdPromotion
-            }
-            res.statusCode = 200
-            res.setHeader('Content-Type', 'application/json')
-            res.json(response)
+            httpResponseHandler(res, 200, message, createdPromotion)
         } catch (err) {
             (err.message && err.message.includes('validation failed')) ? validationErrorHandler(err, res) : errorHandler(err, res)
         }
@@ -46,16 +38,11 @@ promotions.route('/')
         res.statusCode = 403
         res.end('PUT operation not supported on /promotions')
     })
-    .delete(async (req, res) => {
+    .delete(authenticate.verifyUser, async (req, res) => {
         try {
             const deletedPromotions = await Promotions.deleteMany({})
             const message = deletedPromotions.deletedCount ? `${deletedPromotions.deletedCount} promotions deleted!` : 'No promotions deleted!'
-            const response = {
-                message
-            }
-            res.statusCode = 200
-            res.setHeader('Content-Type', 'application/json')
-            res.json(response)
+            httpResponseHandler(res, 200, message)
         } catch (err) {
             errorHandler(err, res)
         }
@@ -70,12 +57,7 @@ promotions.route('/:promotionId')
                 httpResponseHandler(res, 404, `Promotion ${promotionId} not found!`)
             }
             const message = `Promotion ${promotionId} found!`
-            const response = {
-                message,
-                promotion
-            }
-            res.statusCode = 200
-            res.json(response)
+            httpResponseHandler(res, 200, message, promotion)
         } catch (err) {
             errorHandler(err, res)
         }
@@ -85,7 +67,7 @@ promotions.route('/:promotionId')
         res.statusCode = 403
         res.end(`POST operation not supported on /promotions/${promotionId}`)
     })
-    .put(async (req, res) => {
+    .put(authenticate.verifyUser, async (req, res) => {
         try {
             const { promotionId } = req.params
             const promotionUpdatedParams = req.body
@@ -96,17 +78,12 @@ promotions.route('/:promotionId')
                 httpResponseHandler(res, 404, `Promotion ${promotionId} not found!`)
             }
             const message = `Promotion ${promotionId} updated!`
-            const response = {
-                message,
-                updatedPromotion
-            }
-            res.statusCode = 200
-            res.json(response)
+            httpResponseHandler(res, 200, message, updatedPromotion)
         } catch (err) {
             errorHandler(err, res)
         }
     })
-    .delete(async (req, res) => {
+    .delete(authenticate.verifyUser, async (req, res) => {
         try {
             const { promotionId } = req.params
             const deletedPromotion = await Promotions.findByIdAndDelete(promotionId)
@@ -114,11 +91,7 @@ promotions.route('/:promotionId')
                 httpResponseHandler(res, 404, `Promotion ${promotionId} not found!`)
             }
             const message = `Promotion ${promotionId} deleted!`
-            const response = {
-                message
-            }
-            res.statusCode = 200
-            res.json(response)
+            httpResponseHandler(res, 200, message, deletedPromotion)
         } catch (err) {
             errorHandler(err, res)
         }

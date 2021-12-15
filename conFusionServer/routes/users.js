@@ -4,6 +4,7 @@ const passport = require('passport')
 
 const User = require('../models/user')
 const httpResponseHandler = require('../handlers/httpResponseHandler')
+const authenticate = require('../authenticate')
 
 const users = express.Router()
 
@@ -32,7 +33,9 @@ users.post('/signup', (req, res, next) => {
 })
 
 users.post('/login', passport.authenticate('local'), (req, res) => {
-  return httpResponseHandler(res, 200, 'You are logged in!')
+  const { _id } = req.user
+  const token = authenticate.getToken({ _id })
+  return httpResponseHandler(res, 200, 'You are logged in!', { token })
 })
 
 users.get('/logout', (req, res, next) => {

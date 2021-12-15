@@ -1,10 +1,14 @@
 const bodyParser = require('body-parser')
 const express = require('express')
 const mongoose = require('mongoose')
+
 const Dishes = require('../models/dishes')
+
 const errorHandler = require('../handlers/errorHandler')
 const validationErrorHandler = require('../handlers/validationErrorHandler')
 const httpResponseHandler = require('../handlers/httpResponseHandler')
+
+const authenticate = require('../authenticate')
 
 const dishes = express.Router()
 
@@ -15,29 +19,17 @@ dishes.route('/')
         try {
             const dishes = await Dishes.find({})
             const message = dishes ? `${dishes.length} dishes found!` : 'No dishes found!'
-            const response = {
-                message,
-                dishes
-            }
-            res.statusCode = 200
-            res.setHeader('Content-Type', 'application/json')
-            res.json(response)
+            httpResponseHandler(res, 200, message, dishes)
         } catch (err) {
             errorHandler(err, res)
         }
     })
-    .post(async (req, res) => {
+    .post(authenticate.verifyUser, async (req, res) => {
         try {
             const dish = req.body
             const createdDish = await Dishes.create(dish)
             const message = `Dish ${dish.name} was created!`
-            const response = {
-                message,
-                createdDish
-            }
-            res.statusCode = 200
-            res.setHeader('Content-Type', 'application/json')
-            res.json(response)
+            httpResponseHandler(res, 200, message, createdDish)
         } catch (err) {
             (err.message && err.message.includes('validation failed')) ? validationErrorHandler(err, res) : errorHandler(err, res)
         }
@@ -46,16 +38,11 @@ dishes.route('/')
         res.statusCode = 403
         res.end('PUT operation not supported on /dishes')
     })
-    .delete(async (req, res) => {
+    .delete(authenticate.verifyUser, async (req, res) => {
         try {
             const deletedDishes = await Dishes.deleteMany({})
             const message = deletedDishes.deletedCount ? `${deletedDishes.deletedCount} dishes deleted!` : 'No dishes deleted!'
-            const response = {
-                message
-            }
-            res.statusCode = 200
-            res.setHeader('Content-Type', 'application/json')
-            res.json(response)
+            httpResponseHandler(res, 200, message)
         } catch (err) {
             errorHandler(err, res)
         }
@@ -70,12 +57,7 @@ dishes.route('/:dishId')
                 httpResponseHandler(res, 404, `Dish ${dishId} not found!`)
             }
             const message = `Dish ${dishId} found!`
-            const response = {
-                message,
-                dish
-            }
-            res.statusCode = 200
-            res.json(response)
+            httpResponseHandler(res, 200, message, dish)
         } catch (err) {
             errorHandler(err, res)
         }
@@ -85,7 +67,7 @@ dishes.route('/:dishId')
         res.statusCode = 403
         res.end(`POST operation not supported on /dishes/${dishId}`)
     })
-    .put(async (req, res) => {
+    .put(authenticate.verifyUser, async (req, res) => {
         try {
             const { dishId } = req.params
             const dishUpdatedParams = req.body
@@ -96,17 +78,12 @@ dishes.route('/:dishId')
                 httpResponseHandler(res, 404, `Dish ${dishId} not found!`)
             }
             const message = `Dish ${dishId} updated!`
-            const response = {
-                message,
-                updatedDish
-            }
-            res.statusCode = 200
-            res.json(response)
+            httpResponseHandler(res, 200, message, updatedDish)
         } catch (err) {
             errorHandler(err, res)
         }
     })
-    .delete(async (req, res) => {
+    .delete(authenticate.verifyUser, async (req, res) => {
         try {
             const { dishId } = req.params
             const deletedDish = await Dishes.findByIdAndDelete(dishId)
@@ -114,11 +91,7 @@ dishes.route('/:dishId')
                 httpResponseHandler(res, 404, `Dish ${dishId} not found!`)
             }
             const message = `Dish ${dishId} deleted!`
-            const response = {
-                message
-            }
-            res.statusCode = 200
-            res.json(response)
+            httpResponseHandler(res, 200, message, deletedDish)
         } catch (err) {
             errorHandler(err, res)
         }
@@ -134,17 +107,12 @@ dishes.route('/:dishId/comments')
             }
             const comments = dish.comments
             const message = `Dish ${dishId} found with ${comments.length} comments!`
-            const response = {
-                message,
-                comments
-            }
-            res.statusCode = 200
-            res.json(response)
+            httpResponseHandler(res, 200, message, comments)
         } catch (err) {
             errorHandler(err, res)
         }
     })
-    .post(async (req, res) => {
+    .post(authenticate.verifyUser, async (req, res) => {
         try {
             const { dishId } = req.params
             const dish = await Dishes.findById(dishId)
@@ -155,13 +123,7 @@ dishes.route('/:dishId/comments')
             dish.comments.push(comment)
             const updatedDish = await dish.save()
             const message = `Dish ${dishId} was updated!`
-            const response = {
-                message,
-                updatedDish
-            }
-            res.statusCode = 200
-            res.setHeader('Content-Type', 'application/json')
-            res.json(response)
+            httpResponseHandler(res, 200, message, updatedDish)
         } catch (err) {
             (err.message && err.message.includes('validation failed')) ? validationErrorHandler(err, res) : errorHandler(err, res)
         }
@@ -171,7 +133,7 @@ dishes.route('/:dishId/comments')
         res.statusCode = 403
         res.end(`PUT operation not supported on /dishes/${dishId}/comments`)
     })
-    .delete(async (req, res) => {
+    .delete(authenticate.verifyUser, async (req, res) => {
         try {
             const { dishId } = req.params
             const dish = await Dishes.findById(dishId)
@@ -181,13 +143,7 @@ dishes.route('/:dishId/comments')
             dish.comments = []
             const updatedDish = await dish.save()
             const message = `Dish ${dishId} was updated!`
-            const response = {
-                message,
-                updatedDish
-            }
-            res.statusCode = 200
-            res.setHeader('Content-Type', 'application/json')
-            res.json(response)
+            httpResponseHandler(res, 200, message, updatedDish)
         } catch (err) {
             errorHandler(err, res)
         }
@@ -206,12 +162,7 @@ dishes.route('/:dishId/comments/:commentId')
                 httpResponseHandler(res, 404, `Comment ${commentId} not found!`)
             }
             const message = `Comment ${comment} inside dish ${dishId} found!`
-            const response = {
-                message,
-                comment
-            }
-            res.statusCode = 200
-            res.json(response)
+            httpResponseHandler(res, 200, message, comment)
         } catch (err) {
             errorHandler(err, res)
         }
@@ -221,7 +172,7 @@ dishes.route('/:dishId/comments/:commentId')
         res.statusCode = 403
         res.end(`POST operation not supported on /dishes/${dishId}/comments/${commentId}`)
     })
-    .put(async (req, res) => {
+    .put(authenticate.verifyUser, async (req, res) => {
         try {
             const { dishId, commentId } = req.params
             const dish = await Dishes.findByIdAndUpdate(dishId)
@@ -240,17 +191,12 @@ dishes.route('/:dishId/comments/:commentId')
             }
             const updatedDish = await dish.save()
             const message = `Dish ${dishId} and comment ${commentId} updated!`
-            const response = {
-                message,
-                updatedDish
-            }
-            res.statusCode = 200
-            res.json(response)
+            httpResponseHandler(res, 200, message, updatedDish)
         } catch (err) {
             errorHandler(err, res)
         }
     })
-    .delete(async (req, res) => {
+    .delete(authenticate.verifyUser, async (req, res) => {
         try {
             const { dishId, commentId } = req.params
             const dish = await Dishes.findByIdAndUpdate(dishId)
@@ -264,12 +210,7 @@ dishes.route('/:dishId/comments/:commentId')
             dish.comments.id(commentId).remove()
             const updatedDish = await dish.save()
             const message = `Comment ${commentId} from dish ${dishId} deleted!`
-            const response = {
-                message,
-                updatedDish
-            }
-            res.statusCode = 200
-            res.json(response)
+            httpResponseHandler(res, 200, message, updatedDish)
         } catch (err) {
             errorHandler(err, res)
         }
