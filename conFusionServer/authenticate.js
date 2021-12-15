@@ -1,9 +1,8 @@
-/*import passport from 'passport'
-import { Strategy } from 'passport-local'
+const passport = require('passport')
+const localStrategy = require('passport-local').Strategy
 
-import { Users } from './models'
+const User = require('./models/user')
 
-passport.use(new Strategy(Users.authenticate))
-passport.serializeUser(Users.serializeUser)
-passport.deserializeUser(Users.deserializeUser)
-*/
+exports.local = passport.use(new localStrategy(User.authenticate()))
+passport.serializeUser(User.serializeUser())
+passport.deserializeUser(User.deserializeUser())
