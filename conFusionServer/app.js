@@ -47,27 +47,18 @@ app.use(session({
   store: new FileStore()
 }))
 
+app.use('/', indexRouter)
+app.use('/users', users)
+
 const auth = (req, res, next) => {
   const { user } = req.session
 
   if (!user) {
-    const { authorization } = req.headers
-    if (!authorization) {
-      return httpResponseHandler(res, 401, 'You are not authenticated')
-    }
-
-    const [username, password] = new Buffer.from(authorization.split(' ')[1], 'base64').toString().split(':')
-
-    if (username !== 'admin' || password !== 'password') {
-      return httpResponseHandler(res, 403, 'Wrong credentials!')
-    }
-
-    req.session.user = 'admin'
-    return next()
+    return httpResponseHandler(res, 401, 'You are not authenticated')
   }
 
-  if (user !== 'admin') {
-    return httpResponseHandler(res, 403, 'Wrong credentials!')
+  if (user !== 'authenticated') {
+    return httpResponseHandler(res, 401, 'You are not authenticated')
   }
 
   return next()
@@ -76,8 +67,6 @@ app.use(auth)
 
 app.use(express.static(path.join(__dirname, 'public')))
 
-app.use('/', indexRouter)
-app.use('/users', users)
 app.use('/dishes', dishes)
 app.use('/promotions', promotions)
 app.use('/leaders', leaders)
