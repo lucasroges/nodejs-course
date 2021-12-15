@@ -1,6 +1,4 @@
-import { Response } from 'express'
-
-export const validationErrorHandler = (error: any, res: Response) => {
+const validationErrorHandler = (error, res) => {
     console.log(error)
     const message = `Error: ${error._message}`
     const response = {
@@ -10,3 +8,5 @@ export const validationErrorHandler = (error: any, res: Response) => {
     res.setHeader('Content-Type', 'application/json')
     res.json(response)
 }
+
+module.exports = validationErrorHandler

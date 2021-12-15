@@ -1,6 +1,6 @@
-import { model, Schema } from 'mongoose'
+const mongoose = require('mongoose')
 
-const promotionSchema = new Schema({
+const leaderSchema = new mongoose.Schema({
     name: {
         type: String,
         required: true,
@@ -14,12 +14,12 @@ const promotionSchema = new Schema({
         type: String,
         required: true
     },
-    label: {
+    abbr: {
         type: String,
         default: ''
     },
-    price: {
-        type: Number,
+    designation: {
+        type: String,
         required: true
     },
     featured: {
@@ -30,4 +30,6 @@ const promotionSchema = new Schema({
     timestamps: true
 })
 
-export const Promotions = model('Promotion', promotionSchema)
+const Leaders = mongoose.model('Leader', leaderSchema)
+
+module.exports = Leaders

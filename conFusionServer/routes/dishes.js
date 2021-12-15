@@ -1,15 +1,17 @@
-import bodyParser from 'body-parser'
-import express, { Router } from 'express'
-import { } from 'mongoose'
-import { Dishes } from '../models'
-import { errorHandler, httpResponseHandler, validationErrorHandler } from '../handlers'
+const bodyParser = require('body-parser')
+const express = require('express')
+const mongoose = require('mongoose')
+const Dishes = require('../models/dishes')
+const errorHandler = require('../handlers/errorHandler')
+const validationErrorHandler = require('../handlers/validationErrorHandler')
+const httpResponseHandler = require('../handlers/httpResponseHandler')
 
-export const dishes = Router()
+const dishes = express.Router()
 
 dishes.use(bodyParser.json())
 
 dishes.route('/')
-    .get(async (req: express.Request, res: express.Response) => {
+    .get(async (req, res) => {
         try {
             const dishes = await Dishes.find({})
             const message = dishes ? `${dishes.length} dishes found!` : 'No dishes found!'
@@ -24,7 +26,7 @@ dishes.route('/')
             errorHandler(err, res)
         }
     })
-    .post(async (req: express.Request, res: express.Response) => {
+    .post(async (req, res) => {
         try {
             const dish = req.body
             const createdDish = await Dishes.create(dish)
@@ -36,15 +38,15 @@ dishes.route('/')
             res.statusCode = 200
             res.setHeader('Content-Type', 'application/json')
             res.json(response)
-        } catch (err: any) {
+        } catch (err) {
             (err.message && err.message.includes('validation failed')) ? validationErrorHandler(err, res) : errorHandler(err, res)
         }
     })
-    .put((req: express.Request, res: express.Response) => {
+    .put((req, res) => {
         res.statusCode = 403
         res.end('PUT operation not supported on /dishes')
     })
-    .delete(async (req: express.Request, res: express.Response) => {
+    .delete(async (req, res) => {
         try {
             const deletedDishes = await Dishes.deleteMany({})
             const message = deletedDishes.deletedCount ? `${deletedDishes.deletedCount} dishes deleted!` : 'No dishes deleted!'
@@ -60,7 +62,7 @@ dishes.route('/')
     })
 
 dishes.route('/:dishId')
-    .get(async (req: express.Request, res: express.Response) => {
+    .get(async (req, res) => {
         try {
             const { dishId } = req.params
             const dish = await Dishes.findById(dishId)
@@ -78,12 +80,12 @@ dishes.route('/:dishId')
             errorHandler(err, res)
         }
     })
-    .post((req: express.Request, res: express.Response) => {
+    .post((req, res) => {
         const { dishId } = req.params
         res.statusCode = 403
         res.end(`POST operation not supported on /dishes/${dishId}`)
     })
-    .put(async (req: express.Request, res: express.Response) => {
+    .put(async (req, res) => {
         try {
             const { dishId } = req.params
             const dishUpdatedParams = req.body
@@ -104,7 +106,7 @@ dishes.route('/:dishId')
             errorHandler(err, res)
         }
     })
-    .delete(async (req: express.Request, res: express.Response) => {
+    .delete(async (req, res) => {
         try {
             const { dishId } = req.params
             const deletedDish = await Dishes.findByIdAndDelete(dishId)
@@ -123,7 +125,7 @@ dishes.route('/:dishId')
     })
 
 dishes.route('/:dishId/comments')
-    .get(async (req: express.Request, res: express.Response) => {
+    .get(async (req, res) => {
         try {
             const { dishId } = req.params
             const dish = await Dishes.findById(dishId)
@@ -142,7 +144,7 @@ dishes.route('/:dishId/comments')
             errorHandler(err, res)
         }
     })
-    .post(async (req: express.Request, res: express.Response) => {
+    .post(async (req, res) => {
         try {
             const { dishId } = req.params
             const dish = await Dishes.findById(dishId)
@@ -160,16 +162,16 @@ dishes.route('/:dishId/comments')
             res.statusCode = 200
             res.setHeader('Content-Type', 'application/json')
             res.json(response)
-        } catch (err: any) {
+        } catch (err) {
             (err.message && err.message.includes('validation failed')) ? validationErrorHandler(err, res) : errorHandler(err, res)
         }
     })
-    .put(async (req: express.Request, res: express.Response) => {
+    .put(async (req, res) => {
         const { dishId } = req.params
         res.statusCode = 403
         res.end(`PUT operation not supported on /dishes/${dishId}/comments`)
     })
-    .delete(async (req: express.Request, res: express.Response) => {
+    .delete(async (req, res) => {
         try {
             const { dishId } = req.params
             const dish = await Dishes.findById(dishId)
@@ -192,7 +194,7 @@ dishes.route('/:dishId/comments')
     })
 
 dishes.route('/:dishId/comments/:commentId')
-    .get(async (req: express.Request, res: express.Response) => {
+    .get(async (req, res) => {
         try {
             const { dishId, commentId } = req.params
             const dish = await Dishes.findById(dishId)
@@ -214,12 +216,12 @@ dishes.route('/:dishId/comments/:commentId')
             errorHandler(err, res)
         }
     })
-    .post((req: express.Request, res: express.Response) => {
+    .post((req, res) => {
         const { dishId, commentId } = req.params
         res.statusCode = 403
         res.end(`POST operation not supported on /dishes/${dishId}/comments/${commentId}`)
     })
-    .put(async (req: express.Request, res: express.Response) => {
+    .put(async (req, res) => {
         try {
             const { dishId, commentId } = req.params
             const dish = await Dishes.findByIdAndUpdate(dishId)
@@ -248,7 +250,7 @@ dishes.route('/:dishId/comments/:commentId')
             errorHandler(err, res)
         }
     })
-    .delete(async (req: express.Request, res: express.Response) => {
+    .delete(async (req, res) => {
         try {
             const { dishId, commentId } = req.params
             const dish = await Dishes.findByIdAndUpdate(dishId)
@@ -272,3 +274,5 @@ dishes.route('/:dishId/comments/:commentId')
             errorHandler(err, res)
         }
     })
+
+module.exports = dishes

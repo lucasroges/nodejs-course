@@ -4,10 +4,10 @@
  * Module dependencies.
  */
 
-import { app } from '../app'
-import debug from 'debug'
-import http from 'http'
-//var debug = require('debug')('confusionserver:server');
+const app = require('../app')
+const debug = require('debug')('confusionserver:server')
+const http = require('http')
+
 
 /**
  * Get port from environment and store in Express.
@@ -34,7 +34,7 @@ server.on('listening', onListening);
  * Normalize a port into a number, string, or false.
  */
 
-function normalizePort(val: any) {
+function normalizePort(val) {
   const port = parseInt(val, 10);
 
   if (isNaN(port)) {
@@ -54,7 +54,7 @@ function normalizePort(val: any) {
  * Event listener for HTTP server "error" event.
  */
 
-function onError(error: any) {
+function onError(error) {
   if (error.syscall !== 'listen') {
     throw error;
   }
@@ -86,6 +86,6 @@ function onListening() {
   const addr = server.address();
   const bind = typeof addr === 'string'
     ? `Pipe ${addr}`
-    : `port ${addr!.port}`
+    : `port ${addr.port}`
   debug(`Listening on ${bind}`);
 }

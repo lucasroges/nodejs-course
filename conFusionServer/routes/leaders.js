@@ -1,15 +1,17 @@
-import bodyParser from 'body-parser'
-import express, { Router } from 'express'
-import { } from 'mongoose'
-import { Leaders } from '../models'
-import { errorHandler, httpResponseHandler, validationErrorHandler } from '../handlers'
+const bodyParser = require('body-parser')
+const express = require('express')
+const mongoose = require('mongoose')
+const Leaders = require('../models/leaders')
+const errorHandler = require('../handlers/errorHandler')
+const validationErrorHandler = require('../handlers/validationErrorHandler')
+const httpResponseHandler = require('../handlers/httpResponseHandler')
 
-export const leaders = Router()
+const leaders = express.Router()
 
 leaders.use(bodyParser.json())
 
 leaders.route('/')
-    .get(async (req: express.Request, res: express.Response) => {
+    .get(async (req, res) => {
         try {
             const leaders = await Leaders.find({})
             const message = leaders ? `${leaders.length} leaders found!` : 'No leaders found!'
@@ -24,7 +26,7 @@ leaders.route('/')
             errorHandler(err, res)
         }
     })
-    .post(async (req: express.Request, res: express.Response) => {
+    .post(async (req, res) => {
         try {
             const leader = req.body
             const createdLeader = await Leaders.create(leader)
@@ -36,15 +38,15 @@ leaders.route('/')
             res.statusCode = 200
             res.setHeader('Content-Type', 'application/json')
             res.json(response)
-        } catch (err: any) {
+        } catch (err) {
             (err.message && err.message.includes('validation failed')) ? validationErrorHandler(err, res) : errorHandler(err, res)
         }
     })
-    .put((req: express.Request, res: express.Response) => {
+    .put((req, res) => {
         res.statusCode = 403
         res.end('PUT operation not supported on /leaders')
     })
-    .delete(async (req: express.Request, res: express.Response) => {
+    .delete(async (req, res) => {
         try {
             const deletedLeaders = await Leaders.deleteMany({})
             const message = deletedLeaders.deletedCount ? `${deletedLeaders.deletedCount} leaders deleted!` : 'No leaders deleted!'
@@ -60,7 +62,7 @@ leaders.route('/')
     })
 
 leaders.route('/:leaderId')
-    .get(async (req: express.Request, res: express.Response) => {
+    .get(async (req, res) => {
         try {
             const { leaderId } = req.params
             const leader = await Leaders.findById(leaderId)
@@ -78,12 +80,12 @@ leaders.route('/:leaderId')
             errorHandler(err, res)
         }
     })
-    .post((req: express.Request, res: express.Response) => {
+    .post((req, res) => {
         const { leaderId } = req.params
         res.statusCode = 403
         res.end(`POST operation not supported on /leaders/${leaderId}`)
     })
-    .put(async (req: express.Request, res: express.Response) => {
+    .put(async (req, res) => {
         try {
             const { leaderId } = req.params
             const leaderUpdatedParams = req.body
@@ -104,7 +106,7 @@ leaders.route('/:leaderId')
             errorHandler(err, res)
         }
     })
-    .delete(async (req: express.Request, res: express.Response) => {
+    .delete(async (req, res) => {
         try {
             const { leaderId } = req.params
             const deletedLeader = await Leaders.findByIdAndDelete(leaderId)
@@ -121,3 +123,5 @@ leaders.route('/:leaderId')
             errorHandler(err, res)
         }
     })
+
+module.exports = leaders

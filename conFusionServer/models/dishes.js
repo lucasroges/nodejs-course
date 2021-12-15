@@ -1,6 +1,6 @@
-import { model, Schema } from 'mongoose'
+const mongoose = require('mongoose')
 
-const commentSchema = new Schema({
+const commentSchema = new mongoose.Schema({
     rating: {
         type: Number,
         min: 0,
@@ -17,7 +17,7 @@ const commentSchema = new Schema({
     }
 })
 
-const dishSchema = new Schema({
+const dishSchema = new mongoose.Schema({
     name: {
         type: String,
         required: true,
@@ -52,4 +52,6 @@ const dishSchema = new Schema({
     timestamps: true
 })
 
-export const Dishes = model('Dish', dishSchema)
+const Dishes = mongoose.model('Dish', dishSchema)
+
+module.exports = Dishes
