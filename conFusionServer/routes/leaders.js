@@ -19,9 +19,9 @@ leaders.route('/')
         try {
             const leaders = await Leaders.find({})
             const message = leaders ? `${leaders.length} leaders found!` : 'No leaders found!'
-            httpResponseHandler(res, 200, message, leaders)
+            return httpResponseHandler(res, 200, message, leaders)
         } catch (err) {
-            errorHandler(err, res)
+            return errorHandler(err, res)
         }
     })
     .post(authenticate.verifyUser, authenticate.verifyAdmin, async (req, res) => {
@@ -29,7 +29,7 @@ leaders.route('/')
             const leader = req.body
             const createdLeader = await Leaders.create(leader)
             const message = `Leader ${leader.name} was created!`
-            httpResponseHandler(res, 200, message, createdLeader)
+            return httpResponseHandler(res, 200, message, createdLeader)
         } catch (err) {
             (err.message && err.message.includes('validation failed')) ? validationErrorHandler(err, res) : errorHandler(err, res)
         }
@@ -42,9 +42,9 @@ leaders.route('/')
         try {
             const deletedLeaders = await Leaders.deleteMany({})
             const message = deletedLeaders.deletedCount ? `${deletedLeaders.deletedCount} leaders deleted!` : 'No leaders deleted!'
-            httpResponseHandler(res, 200, message)
+            return httpResponseHandler(res, 200, message)
         } catch (err) {
-            errorHandler(err, res)
+            return errorHandler(err, res)
         }
     })
 
@@ -54,12 +54,12 @@ leaders.route('/:leaderId')
             const { leaderId } = req.params
             const leader = await Leaders.findById(leaderId)
             if (!leader) {
-                httpResponseHandler(res, 404, `Leader ${leaderId} not found!`)
+                return httpResponseHandler(res, 404, `Leader ${leaderId} not found!`)
             }
             const message = `Leader ${leaderId} found!`
-            httpResponseHandler(res, 200, message, leader)
+            return httpResponseHandler(res, 200, message, leader)
         } catch (err) {
-            errorHandler(err, res)
+            return errorHandler(err, res)
         }
     })
     .post((req, res) => {
@@ -75,12 +75,12 @@ leaders.route('/:leaderId')
                 $set: leaderUpdatedParams
             }, { new: true })
             if (!updatedLeader) {
-                httpResponseHandler(res, 404, `Leader ${leaderId} not found!`)
+                return httpResponseHandler(res, 404, `Leader ${leaderId} not found!`)
             }
             const message = `Leader ${leaderId} updated!`
-            httpResponseHandler(res, 200, message, updatedLeader)
+            return httpResponseHandler(res, 200, message, updatedLeader)
         } catch (err) {
-            errorHandler(err, res)
+            return errorHandler(err, res)
         }
     })
     .delete(authenticate.verifyUser, authenticate.verifyAdmin, async (req, res) => {
@@ -88,12 +88,12 @@ leaders.route('/:leaderId')
             const { leaderId } = req.params
             const deletedLeader = await Leaders.findByIdAndDelete(leaderId)
             if (!deletedLeader) {
-                httpResponseHandler(res, 404, `Leader ${leaderId} not found!`)
+                return httpResponseHandler(res, 404, `Leader ${leaderId} not found!`)
             }
             const message = `Leader ${leaderId} deleted!`
-            httpResponseHandler(res, 200, message, deletedLeader)
+            return httpResponseHandler(res, 200, message, deletedLeader)
         } catch (err) {
-            errorHandler(err, res)
+            return errorHandler(err, res)
         }
     })
 

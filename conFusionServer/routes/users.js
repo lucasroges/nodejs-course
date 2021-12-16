@@ -17,9 +17,9 @@ users.get('/', authenticate.verifyUser, authenticate.verifyAdmin, async (req, re
   try {
     const users = await User.find({})
     const message = `${users.length} users found!`
-    httpResponseHandler(res, 200, message, users)
+    return httpResponseHandler(res, 200, message, users)
   } catch (err) {
-    errorHandler(err, res)
+    return errorHandler(err, res)
   }
 })
 

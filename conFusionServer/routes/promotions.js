@@ -19,9 +19,9 @@ promotions.route('/')
         try {
             const promotions = await Promotions.find({})
             const message = promotions ? `${promotions.length} promotions found!` : 'No promotions found!'
-            httpResponseHandler(res, 200, message, promotions)
+            return httpResponseHandler(res, 200, message, promotions)
         } catch (err) {
-            errorHandler(err, res)
+            return errorHandler(err, res)
         }
     })
     .post(authenticate.verifyUser, authenticate.verifyAdmin, async (req, res) => {
@@ -29,7 +29,7 @@ promotions.route('/')
             const promotion = req.body
             const createdPromotion = await Promotions.create(promotion)
             const message = `Promotion ${promotion.name} was created!`
-            httpResponseHandler(res, 200, message, createdPromotion)
+            return httpResponseHandler(res, 200, message, createdPromotion)
         } catch (err) {
             (err.message && err.message.includes('validation failed')) ? validationErrorHandler(err, res) : errorHandler(err, res)
         }
@@ -42,9 +42,9 @@ promotions.route('/')
         try {
             const deletedPromotions = await Promotions.deleteMany({})
             const message = deletedPromotions.deletedCount ? `${deletedPromotions.deletedCount} promotions deleted!` : 'No promotions deleted!'
-            httpResponseHandler(res, 200, message)
+            return httpResponseHandler(res, 200, message)
         } catch (err) {
-            errorHandler(err, res)
+            return errorHandler(err, res)
         }
     })
 
@@ -54,12 +54,12 @@ promotions.route('/:promotionId')
             const { promotionId } = req.params
             const promotion = await Promotions.findById(promotionId)
             if (!promotion) {
-                httpResponseHandler(res, 404, `Promotion ${promotionId} not found!`)
+                return httpResponseHandler(res, 404, `Promotion ${promotionId} not found!`)
             }
             const message = `Promotion ${promotionId} found!`
-            httpResponseHandler(res, 200, message, promotion)
+            return httpResponseHandler(res, 200, message, promotion)
         } catch (err) {
-            errorHandler(err, res)
+            return errorHandler(err, res)
         }
     })
     .post((req, res) => {
@@ -75,12 +75,12 @@ promotions.route('/:promotionId')
                 $set: promotionUpdatedParams
             }, { new: true })
             if (!updatedPromotion) {
-                httpResponseHandler(res, 404, `Promotion ${promotionId} not found!`)
+                return httpResponseHandler(res, 404, `Promotion ${promotionId} not found!`)
             }
             const message = `Promotion ${promotionId} updated!`
-            httpResponseHandler(res, 200, message, updatedPromotion)
+            return httpResponseHandler(res, 200, message, updatedPromotion)
         } catch (err) {
-            errorHandler(err, res)
+            return errorHandler(err, res)
         }
     })
     .delete(authenticate.verifyUser, authenticate.verifyAdmin, async (req, res) => {
@@ -88,12 +88,12 @@ promotions.route('/:promotionId')
             const { promotionId } = req.params
             const deletedPromotion = await Promotions.findByIdAndDelete(promotionId)
             if (!deletedPromotion) {
-                httpResponseHandler(res, 404, `Promotion ${promotionId} not found!`)
+                return httpResponseHandler(res, 404, `Promotion ${promotionId} not found!`)
             }
             const message = `Promotion ${promotionId} deleted!`
-            httpResponseHandler(res, 200, message, deletedPromotion)
+            return httpResponseHandler(res, 200, message, deletedPromotion)
         } catch (err) {
-            errorHandler(err, res)
+            return errorHandler(err, res)
         }
     })
 
