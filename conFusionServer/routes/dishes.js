@@ -17,7 +17,7 @@ dishes.use(bodyParser.json())
 dishes.route('/')
     .get(async (req, res) => {
         try {
-            const dishes = await Dishes.find({})
+            const dishes = await Dishes.find({}).populate('comments.author')
             const message = dishes ? `${dishes.length} dishes found!` : 'No dishes found!'
             httpResponseHandler(res, 200, message, dishes)
         } catch (err) {
@@ -52,7 +52,7 @@ dishes.route('/:dishId')
     .get(async (req, res) => {
         try {
             const { dishId } = req.params
-            const dish = await Dishes.findById(dishId)
+            const dish = await Dishes.findById(dishId).populate('comments.author')
             if (!dish) {
                 httpResponseHandler(res, 404, `Dish ${dishId} not found!`)
             }
@@ -101,7 +101,7 @@ dishes.route('/:dishId/comments')
     .get(async (req, res) => {
         try {
             const { dishId } = req.params
-            const dish = await Dishes.findById(dishId)
+            const dish = await Dishes.findById(dishId).populate('comments.author')
             if (!dish) {
                 httpResponseHandler(res, 404, `Dish ${dishId} not found!`)
             }
@@ -119,7 +119,9 @@ dishes.route('/:dishId/comments')
             if (!dish) {
                 httpResponseHandler(res, 404, `Dish ${dishId} not found!`)
             }
-            const comment = req.body
+            const { _id } = req.user
+            const author = _id
+            const comment = { ...req.body, author }
             dish.comments.push(comment)
             const updatedDish = await dish.save()
             const message = `Dish ${dishId} was updated!`
@@ -153,7 +155,7 @@ dishes.route('/:dishId/comments/:commentId')
     .get(async (req, res) => {
         try {
             const { dishId, commentId } = req.params
-            const dish = await Dishes.findById(dishId)
+            const dish = await Dishes.findById(dishId).populate('comments.author')
             if (!dish) {
                 httpResponseHandler(res, 404, `Dish ${dishId} not found!`)
             }

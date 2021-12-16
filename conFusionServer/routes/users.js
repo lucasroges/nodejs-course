@@ -14,14 +14,14 @@ users.get('/', (req, res, next) => {
   res.send('respond with a resource')
 })
 
-users.post('/signup', (req, res, next) => {
-  const { username, password } = req.body
+users.post('/signup', async (req, res, next) => {
+  const { username, password, firstName, lastName } = req.body
 
-  if (!username || !password) {
+  if (!username || !password || !firstName || !lastName) {
     return httpResponseHandler(res, 400, 'Missing parameters on the request body!')
   }
 
-  User.register(new User({ username }), password, (err, user) => {
+  User.register(new User({ username, firstName, lastName }), password, async (err, user) => {
     if (err) {
       return httpResponseHandler(res, 500, 'Error creating new user')
     }
