@@ -24,7 +24,7 @@ dishes.route('/')
             errorHandler(err, res)
         }
     })
-    .post(authenticate.verifyUser, async (req, res) => {
+    .post(authenticate.verifyUser, authenticate.verifyAdmin, async (req, res) => {
         try {
             const dish = req.body
             const createdDish = await Dishes.create(dish)
@@ -38,7 +38,7 @@ dishes.route('/')
         res.statusCode = 403
         res.end('PUT operation not supported on /dishes')
     })
-    .delete(authenticate.verifyUser, async (req, res) => {
+    .delete(authenticate.verifyUser, authenticate.verifyAdmin, async (req, res) => {
         try {
             const deletedDishes = await Dishes.deleteMany({})
             const message = deletedDishes.deletedCount ? `${deletedDishes.deletedCount} dishes deleted!` : 'No dishes deleted!'
@@ -67,7 +67,7 @@ dishes.route('/:dishId')
         res.statusCode = 403
         res.end(`POST operation not supported on /dishes/${dishId}`)
     })
-    .put(authenticate.verifyUser, async (req, res) => {
+    .put(authenticate.verifyUser, authenticate.verifyAdmin, async (req, res) => {
         try {
             const { dishId } = req.params
             const dishUpdatedParams = req.body
@@ -83,7 +83,7 @@ dishes.route('/:dishId')
             errorHandler(err, res)
         }
     })
-    .delete(authenticate.verifyUser, async (req, res) => {
+    .delete(authenticate.verifyUser, authenticate.verifyAdmin, async (req, res) => {
         try {
             const { dishId } = req.params
             const deletedDish = await Dishes.findByIdAndDelete(dishId)
@@ -135,7 +135,7 @@ dishes.route('/:dishId/comments')
         res.statusCode = 403
         res.end(`PUT operation not supported on /dishes/${dishId}/comments`)
     })
-    .delete(authenticate.verifyUser, async (req, res) => {
+    .delete(authenticate.verifyUser, authenticate.verifyAdmin, async (req, res) => {
         try {
             const { dishId } = req.params
             const dish = await Dishes.findById(dishId)

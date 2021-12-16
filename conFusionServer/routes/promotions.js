@@ -24,7 +24,7 @@ promotions.route('/')
             errorHandler(err, res)
         }
     })
-    .post(authenticate.verifyUser, async (req, res) => {
+    .post(authenticate.verifyUser, authenticate.verifyAdmin, async (req, res) => {
         try {
             const promotion = req.body
             const createdPromotion = await Promotions.create(promotion)
@@ -38,7 +38,7 @@ promotions.route('/')
         res.statusCode = 403
         res.end('PUT operation not supported on /promotions')
     })
-    .delete(authenticate.verifyUser, async (req, res) => {
+    .delete(authenticate.verifyUser, authenticate.verifyAdmin, async (req, res) => {
         try {
             const deletedPromotions = await Promotions.deleteMany({})
             const message = deletedPromotions.deletedCount ? `${deletedPromotions.deletedCount} promotions deleted!` : 'No promotions deleted!'
@@ -67,7 +67,7 @@ promotions.route('/:promotionId')
         res.statusCode = 403
         res.end(`POST operation not supported on /promotions/${promotionId}`)
     })
-    .put(authenticate.verifyUser, async (req, res) => {
+    .put(authenticate.verifyUser, authenticate.verifyAdmin, async (req, res) => {
         try {
             const { promotionId } = req.params
             const promotionUpdatedParams = req.body
@@ -83,7 +83,7 @@ promotions.route('/:promotionId')
             errorHandler(err, res)
         }
     })
-    .delete(authenticate.verifyUser, async (req, res) => {
+    .delete(authenticate.verifyUser, authenticate.verifyAdmin, async (req, res) => {
         try {
             const { promotionId } = req.params
             const deletedPromotion = await Promotions.findByIdAndDelete(promotionId)

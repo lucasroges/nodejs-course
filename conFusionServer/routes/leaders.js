@@ -24,7 +24,7 @@ leaders.route('/')
             errorHandler(err, res)
         }
     })
-    .post(authenticate.verifyUser, async (req, res) => {
+    .post(authenticate.verifyUser, authenticate.verifyAdmin, async (req, res) => {
         try {
             const leader = req.body
             const createdLeader = await Leaders.create(leader)
@@ -38,7 +38,7 @@ leaders.route('/')
         res.statusCode = 403
         res.end('PUT operation not supported on /leaders')
     })
-    .delete(authenticate.verifyUser, async (req, res) => {
+    .delete(authenticate.verifyUser, authenticate.verifyAdmin, async (req, res) => {
         try {
             const deletedLeaders = await Leaders.deleteMany({})
             const message = deletedLeaders.deletedCount ? `${deletedLeaders.deletedCount} leaders deleted!` : 'No leaders deleted!'
@@ -67,7 +67,7 @@ leaders.route('/:leaderId')
         res.statusCode = 403
         res.end(`POST operation not supported on /leaders/${leaderId}`)
     })
-    .put(authenticate.verifyUser, async (req, res) => {
+    .put(authenticate.verifyUser, authenticate.verifyAdmin, async (req, res) => {
         try {
             const { leaderId } = req.params
             const leaderUpdatedParams = req.body
@@ -83,7 +83,7 @@ leaders.route('/:leaderId')
             errorHandler(err, res)
         }
     })
-    .delete(authenticate.verifyUser, async (req, res) => {
+    .delete(authenticate.verifyUser, authenticate.verifyAdmin, async (req, res) => {
         try {
             const { leaderId } = req.params
             const deletedLeader = await Leaders.findByIdAndDelete(leaderId)

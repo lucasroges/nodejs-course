@@ -7,6 +7,8 @@ const jwt = require('jsonwebtoken')
 const User = require('./models/user')
 const config = require('./config')
 
+const httpResponseHandler = require('./handlers/httpResponseHandler')
+
 exports.local = passport.use(new localStrategy(User.authenticate()))
 passport.serializeUser(User.serializeUser())
 passport.deserializeUser(User.deserializeUser())
@@ -34,3 +36,13 @@ const verify = async (jwt_payload, done) => {
 exports.jwtPassport = passport.use(new JwtStrategy(opt, verify))
 
 exports.verifyUser = passport.authenticate('jwt', { session: false })
+
+exports.verifyAdmin = (req, res, next) => {
+    const { user } = req
+
+    if (!user || !user.admin) {
+        return httpResponseHandler(res, 403, 'Operation not allowed!')
+    }
+
+    return next()
+}

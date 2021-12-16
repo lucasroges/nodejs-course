@@ -3,15 +3,24 @@ const express = require('express')
 const passport = require('passport')
 
 const User = require('../models/user')
+
+const errorHandler = require('../handlers/errorHandler')
 const httpResponseHandler = require('../handlers/httpResponseHandler')
+
 const authenticate = require('../authenticate')
 
 const users = express.Router()
 
 users.use(bodyParser.json())
 
-users.get('/', (req, res, next) => {
-  res.send('respond with a resource')
+users.get('/', authenticate.verifyUser, authenticate.verifyAdmin, async (req, res, next) => {
+  try {
+    const users = await User.find({})
+    const message = `${users.length} users found!`
+    httpResponseHandler(res, 200, message, users)
+  } catch (err) {
+    errorHandler(err, res)
+  }
 })
 
 users.post('/signup', async (req, res, next) => {
