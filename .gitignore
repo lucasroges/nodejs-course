@@ -4,3 +4,4 @@ conFusionServer/example.json
 conFusionServer/bin/certificate.cert
 conFusionServer/bin/private.key
 **.jpeg
+**.env
