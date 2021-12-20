@@ -7,14 +7,18 @@
 const app = require('../app')
 const debug = require('debug')('confusionserver:server')
 const http = require('http')
+const https = require('https')
+const fs = require('fs')
 
 
 /**
  * Get port from environment and store in Express.
  */
 
-const port = normalizePort(process.env.PORT || '3000');
-app.set('port', port);
+const port = normalizePort(process.env.PORT || '3000')
+const securePort = normalizePort(port + 443)
+app.set('port', port)
+app.set('securePort', securePort)
 
 /**
  * Create HTTP server.
@@ -29,6 +33,17 @@ const server = http.createServer(app);
 server.listen(port);
 server.on('error', onError);
 server.on('listening', onListening);
+
+const options = {
+  key: fs.readFileSync(`${__dirname}/private.key`),
+  cert: fs.readFileSync(`${__dirname}/certificate.cert`)
+}
+
+const secureServer = https.createServer(options, app)
+
+secureServer.listen(securePort)
+secureServer.on('error', onError);
+secureServer.on('listening', onListening);
 
 /**
  * Normalize a port into a number, string, or false.
@@ -87,5 +102,5 @@ function onListening() {
   const bind = typeof addr === 'string'
     ? `Pipe ${addr}`
     : `port ${addr.port}`
-  debug(`Listening on ${bind}`);
+  console.log(`Listening on ${bind}`);
 }

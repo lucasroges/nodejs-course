@@ -11,9 +11,6 @@ const dishes = require('./routes/dishes')
 const promotions = require('./routes/promotions')
 const leaders = require('./routes/leaders')
 
-const httpResponseHandler = require('./handlers/httpResponseHandler')
-
-const authenticate = require('./authenticate')
 const config = require('./config')
 
 const URL = config.mongoUrl
@@ -29,6 +26,19 @@ connection.then(
 )
 
 const app = express()
+
+app.all('*', (req, res, next) => {
+  const { secure } = req
+
+  if (!secure) {
+    const { hostname, url } = req
+    const securePort = app.get('securePort')
+    console.log(`Redirecting to https://${hostname}:${securePort}${url}`)
+    return res.redirect(307, `https://${hostname}:${securePort}${url}`)
+  }
+
+  return next()
+})
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'))
