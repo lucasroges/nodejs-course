@@ -10,12 +10,17 @@ const httpResponseHandler = require('../handlers/httpResponseHandler')
 
 const authenticate = require('../authenticate')
 
+const cors = require('./cors')
+
 const leaders = express.Router()
 
 leaders.use(bodyParser.json())
 
 leaders.route('/')
-    .get(async (req, res) => {
+    .options(cors.corsWithOptions, (req, res) => {
+        res.sendStatus(200)
+    })
+    .get(cors.cors, async (req, res) => {
         try {
             const leaders = await Leaders.find({})
             const message = leaders ? `${leaders.length} leaders found!` : 'No leaders found!'
@@ -24,7 +29,7 @@ leaders.route('/')
             return errorHandler(err, res)
         }
     })
-    .post(authenticate.verifyUser, authenticate.verifyAdmin, async (req, res) => {
+    .post(cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, async (req, res) => {
         try {
             const leader = req.body
             const createdLeader = await Leaders.create(leader)
@@ -34,11 +39,11 @@ leaders.route('/')
             (err.message && err.message.includes('validation failed')) ? validationErrorHandler(err, res) : errorHandler(err, res)
         }
     })
-    .put((req, res) => {
+    .put(cors.corsWithOptions, (req, res) => {
         res.statusCode = 403
         res.end('PUT operation not supported on /leaders')
     })
-    .delete(authenticate.verifyUser, authenticate.verifyAdmin, async (req, res) => {
+    .delete(cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, async (req, res) => {
         try {
             const deletedLeaders = await Leaders.deleteMany({})
             const message = deletedLeaders.deletedCount ? `${deletedLeaders.deletedCount} leaders deleted!` : 'No leaders deleted!'
@@ -49,7 +54,10 @@ leaders.route('/')
     })
 
 leaders.route('/:leaderId')
-    .get(async (req, res) => {
+    .options(cors.corsWithOptions, (req, res) => {
+        res.sendStatus(200)
+    })
+    .get(cors.cors, async (req, res) => {
         try {
             const { leaderId } = req.params
             const leader = await Leaders.findById(leaderId)
@@ -62,12 +70,12 @@ leaders.route('/:leaderId')
             return errorHandler(err, res)
         }
     })
-    .post((req, res) => {
+    .post(cors.corsWithOptions, (req, res) => {
         const { leaderId } = req.params
         res.statusCode = 403
         res.end(`POST operation not supported on /leaders/${leaderId}`)
     })
-    .put(authenticate.verifyUser, authenticate.verifyAdmin, async (req, res) => {
+    .put(cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, async (req, res) => {
         try {
             const { leaderId } = req.params
             const leaderUpdatedParams = req.body
@@ -83,7 +91,7 @@ leaders.route('/:leaderId')
             return errorHandler(err, res)
         }
     })
-    .delete(authenticate.verifyUser, authenticate.verifyAdmin, async (req, res) => {
+    .delete(cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, async (req, res) => {
         try {
             const { leaderId } = req.params
             const deletedLeader = await Leaders.findByIdAndDelete(leaderId)

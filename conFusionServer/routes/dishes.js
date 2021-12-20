@@ -10,12 +10,17 @@ const httpResponseHandler = require('../handlers/httpResponseHandler')
 
 const authenticate = require('../authenticate')
 
+const cors = require('./cors')
+
 const dishes = express.Router()
 
 dishes.use(bodyParser.json())
 
 dishes.route('/')
-    .get(async (req, res) => {
+    .options(cors.corsWithOptions, (req, res) => {
+        res.sendStatus(200)
+    })
+    .get(cors.cors, async (req, res) => {
         try {
             const dishes = await Dishes.find({}).populate('comments.author')
             const message = dishes ? `${dishes.length} dishes found!` : 'No dishes found!'
@@ -24,7 +29,7 @@ dishes.route('/')
             return errorHandler(err, res)
         }
     })
-    .post(authenticate.verifyUser, authenticate.verifyAdmin, async (req, res) => {
+    .post(cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, async (req, res) => {
         try {
             const dish = req.body
             const createdDish = await Dishes.create(dish)
@@ -34,11 +39,11 @@ dishes.route('/')
             (err.message && err.message.includes('validation failed')) ? validationErrorHandler(err, res) : errorHandler(err, res)
         }
     })
-    .put((req, res) => {
+    .put(cors.corsWithOptions, (req, res) => {
         res.statusCode = 403
         res.end('PUT operation not supported on /dishes')
     })
-    .delete(authenticate.verifyUser, authenticate.verifyAdmin, async (req, res) => {
+    .delete(cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, async (req, res) => {
         try {
             const deletedDishes = await Dishes.deleteMany({})
             const message = deletedDishes.deletedCount ? `${deletedDishes.deletedCount} dishes deleted!` : 'No dishes deleted!'
@@ -49,7 +54,10 @@ dishes.route('/')
     })
 
 dishes.route('/:dishId')
-    .get(async (req, res) => {
+    .options(cors.corsWithOptions, (req, res) => {
+        res.sendStatus(200)
+    })
+    .get(cors.cors, async (req, res) => {
         try {
             const { dishId } = req.params
             const dish = await Dishes.findById(dishId).populate('comments.author')
@@ -62,12 +70,12 @@ dishes.route('/:dishId')
             return errorHandler(err, res)
         }
     })
-    .post((req, res) => {
+    .post(cors.corsWithOptions, (req, res) => {
         const { dishId } = req.params
         res.statusCode = 403
         res.end(`POST operation not supported on /dishes/${dishId}`)
     })
-    .put(authenticate.verifyUser, authenticate.verifyAdmin, async (req, res) => {
+    .put(cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, async (req, res) => {
         try {
             const { dishId } = req.params
             const dishUpdatedParams = req.body
@@ -83,7 +91,7 @@ dishes.route('/:dishId')
             return errorHandler(err, res)
         }
     })
-    .delete(authenticate.verifyUser, authenticate.verifyAdmin, async (req, res) => {
+    .delete(cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, async (req, res) => {
         try {
             const { dishId } = req.params
             const deletedDish = await Dishes.findByIdAndDelete(dishId)
@@ -98,7 +106,10 @@ dishes.route('/:dishId')
     })
 
 dishes.route('/:dishId/comments')
-    .get(async (req, res) => {
+    .options(cors.corsWithOptions, (req, res) => {
+        res.sendStatus(200)
+    })
+    .get(cors.cors, async (req, res) => {
         try {
             const { dishId } = req.params
             const dish = await Dishes.findById(dishId).populate('comments.author')
@@ -112,7 +123,7 @@ dishes.route('/:dishId/comments')
             return errorHandler(err, res)
         }
     })
-    .post(authenticate.verifyUser, async (req, res) => {
+    .post(cors.corsWithOptions, authenticate.verifyUser, async (req, res) => {
         try {
             const { dishId } = req.params
             const dish = await Dishes.findById(dishId)
@@ -130,12 +141,12 @@ dishes.route('/:dishId/comments')
             (err.message && err.message.includes('validation failed')) ? validationErrorHandler(err, res) : errorHandler(err, res)
         }
     })
-    .put(async (req, res) => {
+    .put(cors.corsWithOptions, async (req, res) => {
         const { dishId } = req.params
         res.statusCode = 403
         res.end(`PUT operation not supported on /dishes/${dishId}/comments`)
     })
-    .delete(authenticate.verifyUser, authenticate.verifyAdmin, async (req, res) => {
+    .delete(cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, async (req, res) => {
         try {
             const { dishId } = req.params
             const dish = await Dishes.findById(dishId)
@@ -152,7 +163,10 @@ dishes.route('/:dishId/comments')
     })
 
 dishes.route('/:dishId/comments/:commentId')
-    .get(async (req, res) => {
+    .options(cors.corsWithOptions, (req, res) => {
+        res.sendStatus(200)
+    })
+    .get(cors.cors, async (req, res) => {
         try {
             const { dishId, commentId } = req.params
             const dish = await Dishes.findById(dishId).populate('comments.author')
@@ -169,12 +183,12 @@ dishes.route('/:dishId/comments/:commentId')
             return errorHandler(err, res)
         }
     })
-    .post((req, res) => {
+    .post(cors.corsWithOptions, (req, res) => {
         const { dishId, commentId } = req.params
         res.statusCode = 403
         res.end(`POST operation not supported on /dishes/${dishId}/comments/${commentId}`)
     })
-    .put(authenticate.verifyUser, async (req, res) => {
+    .put(cors.corsWithOptions, authenticate.verifyUser, async (req, res) => {
         try {
             const { _id } = req.user
             const { dishId, commentId } = req.params
@@ -202,7 +216,7 @@ dishes.route('/:dishId/comments/:commentId')
             return errorHandler(err, res)
         }
     })
-    .delete(authenticate.verifyUser, async (req, res) => {
+    .delete(cors.corsWithOptions, authenticate.verifyUser, async (req, res) => {
         try {
             const { _id } = req.user
             const { dishId, commentId } = req.params

@@ -9,11 +9,13 @@ const httpResponseHandler = require('../handlers/httpResponseHandler')
 
 const authenticate = require('../authenticate')
 
+const cors = require('./cors')
+
 const users = express.Router()
 
 users.use(bodyParser.json())
 
-users.get('/', authenticate.verifyUser, authenticate.verifyAdmin, async (req, res, next) => {
+users.get('/', cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, async (req, res, next) => {
   try {
     const users = await User.find({})
     const message = `${users.length} users found!`
@@ -23,7 +25,7 @@ users.get('/', authenticate.verifyUser, authenticate.verifyAdmin, async (req, re
   }
 })
 
-users.post('/signup', async (req, res, next) => {
+users.post('/signup', cors.corsWithOptions, async (req, res, next) => {
   const { username, password, firstName, lastName } = req.body
 
   if (!username || !password || !firstName || !lastName) {
@@ -41,13 +43,13 @@ users.post('/signup', async (req, res, next) => {
   })
 })
 
-users.post('/login', passport.authenticate('local'), (req, res) => {
+users.post('/login', cors.corsWithOptions, passport.authenticate('local'), (req, res) => {
   const { _id } = req.user
   const token = authenticate.getToken({ _id })
   return httpResponseHandler(res, 200, 'You are logged in!', { token })
 })
 
-users.get('/logout', (req, res, next) => {
+users.get('/logout', cors.corsWithOptions, (req, res, next) => {
   if (!req.session) {
     return httpResponseHandler(res, 403, 'You are not logged in')
   }

@@ -10,12 +10,17 @@ const httpResponseHandler = require('../handlers/httpResponseHandler')
 
 const authenticate = require('../authenticate')
 
+const cors = require('./cors')
+
 const promotions = express.Router()
 
 promotions.use(bodyParser.json())
 
 promotions.route('/')
-    .get(async (req, res) => {
+    .options(cors.corsWithOptions, (req, res) => {
+        res.sendStatus(200)
+    })
+    .get(cors.cors, async (req, res) => {
         try {
             const promotions = await Promotions.find({})
             const message = promotions ? `${promotions.length} promotions found!` : 'No promotions found!'
@@ -24,7 +29,7 @@ promotions.route('/')
             return errorHandler(err, res)
         }
     })
-    .post(authenticate.verifyUser, authenticate.verifyAdmin, async (req, res) => {
+    .post(cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, async (req, res) => {
         try {
             const promotion = req.body
             const createdPromotion = await Promotions.create(promotion)
@@ -34,11 +39,11 @@ promotions.route('/')
             (err.message && err.message.includes('validation failed')) ? validationErrorHandler(err, res) : errorHandler(err, res)
         }
     })
-    .put((req, res) => {
+    .put(cors.corsWithOptions, (req, res) => {
         res.statusCode = 403
         res.end('PUT operation not supported on /promotions')
     })
-    .delete(authenticate.verifyUser, authenticate.verifyAdmin, async (req, res) => {
+    .delete(cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, async (req, res) => {
         try {
             const deletedPromotions = await Promotions.deleteMany({})
             const message = deletedPromotions.deletedCount ? `${deletedPromotions.deletedCount} promotions deleted!` : 'No promotions deleted!'
@@ -49,7 +54,10 @@ promotions.route('/')
     })
 
 promotions.route('/:promotionId')
-    .get(async (req, res) => {
+    .options(cors.corsWithOptions, (req, res) => {
+        res.sendStatus(200)
+    })
+    .get(cors.cors, async (req, res) => {
         try {
             const { promotionId } = req.params
             const promotion = await Promotions.findById(promotionId)
@@ -62,12 +70,12 @@ promotions.route('/:promotionId')
             return errorHandler(err, res)
         }
     })
-    .post((req, res) => {
+    .post(cors.corsWithOptions, (req, res) => {
         const { promotionId } = req.params
         res.statusCode = 403
         res.end(`POST operation not supported on /promotions/${promotionId}`)
     })
-    .put(authenticate.verifyUser, authenticate.verifyAdmin, async (req, res) => {
+    .put(cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, async (req, res) => {
         try {
             const { promotionId } = req.params
             const promotionUpdatedParams = req.body
@@ -83,7 +91,7 @@ promotions.route('/:promotionId')
             return errorHandler(err, res)
         }
     })
-    .delete(authenticate.verifyUser, authenticate.verifyAdmin, async (req, res) => {
+    .delete(cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, async (req, res) => {
         try {
             const { promotionId } = req.params
             const deletedPromotion = await Promotions.findByIdAndDelete(promotionId)
