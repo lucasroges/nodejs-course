@@ -1,3 +1,5 @@
 *.pdf
 */node_modules
 conFusionServer/example.json
+conFusionServer/bin/certificate.cert
+conFusionServer/bin/private.key
