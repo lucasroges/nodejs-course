@@ -10,6 +10,7 @@ const users = require('./routes/users')
 const dishes = require('./routes/dishes')
 const promotions = require('./routes/promotions')
 const leaders = require('./routes/leaders')
+const uploadRouter = require('./routes/upload')
 
 const config = require('./config')
 
@@ -58,6 +59,7 @@ app.use(express.static(path.join(__dirname, 'public')))
 app.use('/dishes', dishes)
 app.use('/promotions', promotions)
 app.use('/leaders', leaders)
+app.use('/imageUpload', uploadRouter)
 
 // catch 404 and forward to error handler
 app.use((req, res, next) => {
