@@ -5,6 +5,9 @@ const logger = require('morgan')
 const mongoose = require('mongoose')
 const passport = require('passport')
 
+const dotenv = require('dotenv')
+dotenv.config()
+
 const indexRouter = require('./routes/index')
 const users = require('./routes/users')
 const dishes = require('./routes/dishes')
@@ -12,10 +15,7 @@ const promotions = require('./routes/promotions')
 const leaders = require('./routes/leaders')
 const uploadRouter = require('./routes/upload')
 
-const config = require('./config')
-
-const URL = config.mongoUrl
-const secret = config.secretKey
+const URL = process.env.MONGO_URL
 
 const connection = mongoose.connect(URL)
 connection.then(

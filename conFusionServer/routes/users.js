@@ -59,4 +59,15 @@ users.get('/logout', cors.corsWithOptions, (req, res, next) => {
   res.redirect('/')
 })
 
+users.get('/facebook/token', passport.authenticate('facebook-token'), (req, res) => {
+  const { user } = req
+  if (!user) {
+    return httpResponseHandler(res, 403, 'You are not authorized to login through Facebook')
+  }
+
+  const { _id } = req.user
+  const token = authenticate.getToken({ _id })
+  return httpResponseHandler(res, 200, 'You are logged in!', { token })
+})
+
 module.exports = users

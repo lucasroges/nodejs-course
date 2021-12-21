@@ -10,6 +10,7 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    facebookId: String,
     admin: {
         type: Boolean,
         default: false
