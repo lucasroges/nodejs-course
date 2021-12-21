@@ -8,9 +8,9 @@ const jwt = require('jsonwebtoken')
 const dotenv = require('dotenv')
 dotenv.config()
 
-const User = require('./models/user')
+const User = require('./src/models/user')
 
-const httpResponseHandler = require('./handlers/httpResponseHandler')
+const httpResponseHandler = require('./src/utils/httpResponseHandler')
 
 exports.local = passport.use(new localStrategy(User.authenticate()))
 passport.serializeUser(User.serializeUser())

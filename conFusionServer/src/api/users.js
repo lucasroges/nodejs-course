@@ -4,10 +4,10 @@ const passport = require('passport')
 
 const User = require('../models/user')
 
-const errorHandler = require('../handlers/errorHandler')
-const httpResponseHandler = require('../handlers/httpResponseHandler')
+const errorHandler = require('../utils/errorHandler')
+const httpResponseHandler = require('../utils/httpResponseHandler')
 
-const authenticate = require('../authenticate')
+const authenticate = require('../../authenticate')
 
 const cors = require('./cors')
 

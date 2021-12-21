@@ -4,11 +4,11 @@ const mongoose = require('mongoose')
 
 const Dishes = require('../models/dishes')
 
-const errorHandler = require('../handlers/errorHandler')
-const validationErrorHandler = require('../handlers/validationErrorHandler')
-const httpResponseHandler = require('../handlers/httpResponseHandler')
+const errorHandler = require('../utils/errorHandler')
+const validationErrorHandler = require('../utils/validationErrorHandler')
+const httpResponseHandler = require('../utils/httpResponseHandler')
 
-const authenticate = require('../authenticate')
+const authenticate = require('../../authenticate')
 
 const cors = require('./cors')
 

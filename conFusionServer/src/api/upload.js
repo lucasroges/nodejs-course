@@ -27,11 +27,11 @@ const upload = multer({
     fileFilter
 })
 
-const errorHandler = require('../handlers/errorHandler')
-const validationErrorHandler = require('../handlers/validationErrorHandler')
-const httpResponseHandler = require('../handlers/httpResponseHandler')
+const errorHandler = require('../utils/errorHandler')
+const validationErrorHandler = require('../utils/validationErrorHandler')
+const httpResponseHandler = require('../utils/httpResponseHandler')
 
-const authenticate = require('../authenticate')
+const authenticate = require('../../authenticate')
 
 const uploadRouter = express.Router()
 
