@@ -8,13 +8,13 @@ const jwt = require('jsonwebtoken')
 const dotenv = require('dotenv')
 dotenv.config()
 
-const User = require('./src/models/user')
+const { Users } = require('../models/user')
 
-const httpResponseHandler = require('./src/utils/httpResponseHandler')
+const httpResponseHandler = require('../utils/httpResponseHandler')
 
-exports.local = passport.use(new localStrategy(User.authenticate()))
-passport.serializeUser(User.serializeUser())
-passport.deserializeUser(User.deserializeUser())
+exports.local = passport.use(new localStrategy(Users.authenticate()))
+passport.serializeUser(Users.serializeUser())
+passport.deserializeUser(Users.deserializeUser())
 
 const secretKey = process.env.SECRET_KEY
 
@@ -29,7 +29,7 @@ const verify = async (jwt_payload, done) => {
 
     const { _id } = jwt_payload
 
-    const user = await User.findOne({ _id })
+    const user = await Users.findOne({ _id })
 
     if (!user) {
         return done(null, false)
@@ -57,11 +57,11 @@ exports.facebookPassport = passport.use(new FacebookTokenStrategy({
     clientSecret: process.env.FACEBOOK_APP_SECRET
 }, async (accessToken, refreshToken, profile, done) => {
     const { id, displayName } = profile
-    const user = await User.findOne({ facebookId: id})
+    const user = await Users.findOne({ facebookId: id})
 
     if (!user) {
         const { givenName, familyName } = profile.name
-        const newUser = await new User({
+        const newUser = await new Users({
             username: displayName,
             facebookId: id,
             firstName: givenName,

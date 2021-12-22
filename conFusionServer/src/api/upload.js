@@ -2,7 +2,7 @@ const bodyParser = require('body-parser')
 const express = require('express')
 const multer = require('multer')
 
-const cors = require('./cors')
+const cors = require('../middlewares/cors')
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
@@ -27,11 +27,9 @@ const upload = multer({
     fileFilter
 })
 
-const errorHandler = require('../utils/errorHandler')
-const validationErrorHandler = require('../utils/validationErrorHandler')
 const httpResponseHandler = require('../utils/httpResponseHandler')
 
-const authenticate = require('../../authenticate')
+const authenticate = require('../middlewares/authenticate')
 
 const uploadRouter = express.Router()
 
@@ -50,7 +48,7 @@ uploadRouter.route('/')
             const message = `File successfully uploaded!`
             return httpResponseHandler(res, 200, message, { file })
         } catch (err) {
-            errorHandler(err, res)
+            return httpResponseHandler(res, 500, 'Internal Server Error', {}, err)
         }
     })
     .put(cors.corsWithOptions, (req, res) => {

@@ -54,4 +54,7 @@ const dishSchema = new mongoose.Schema({
 
 const Dishes = mongoose.model('Dish', dishSchema)
 
-module.exports = Dishes
+module.exports = {
+    Dishes,
+    dishSchema
+}

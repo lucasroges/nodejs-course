@@ -2,37 +2,36 @@ const bodyParser = require('body-parser')
 const express = require('express')
 const passport = require('passport')
 
-const User = require('../models/user')
+const { Users } = require('../models/user')
 
-const errorHandler = require('../utils/errorHandler')
 const httpResponseHandler = require('../utils/httpResponseHandler')
 
-const authenticate = require('../../authenticate')
+const authenticate = require('../middlewares/authenticate')
 
-const cors = require('./cors')
+const cors = require('../middlewares/cors')
 
-const users = express.Router()
+const usersRouter = express.Router()
 
-users.use(bodyParser.json())
+usersRouter.use(bodyParser.json())
 
-users.get('/', cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, async (req, res, next) => {
+usersRouter.get('/', cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, async (req, res, next) => {
   try {
-    const users = await User.find({})
+    const users = await Users.find({})
     const message = `${users.length} users found!`
     return httpResponseHandler(res, 200, message, users)
   } catch (err) {
-    return errorHandler(err, res)
+    return httpResponseHandler(res, 500, 'Internal Server Error', {}, err)
   }
 })
 
-users.post('/signup', cors.corsWithOptions, async (req, res, next) => {
+usersRouter.post('/signup', cors.corsWithOptions, async (req, res, next) => {
   const { username, password, firstName, lastName } = req.body
 
   if (!username || !password || !firstName || !lastName) {
     return httpResponseHandler(res, 400, 'Missing parameters on the request body!')
   }
 
-  User.register(new User({ username, firstName, lastName }), password, async (err, user) => {
+  Users.register(new Users({ username, firstName, lastName }), password, async (err, user) => {
     if (err) {
       return httpResponseHandler(res, 500, 'Error creating new user')
     }
@@ -43,13 +42,13 @@ users.post('/signup', cors.corsWithOptions, async (req, res, next) => {
   })
 })
 
-users.post('/login', cors.corsWithOptions, passport.authenticate('local'), (req, res) => {
+usersRouter.post('/login', cors.corsWithOptions, passport.authenticate('local'), (req, res) => {
   const { _id } = req.user
   const token = authenticate.getToken({ _id })
   return httpResponseHandler(res, 200, 'You are logged in!', { token })
 })
 
-users.get('/logout', cors.corsWithOptions, (req, res, next) => {
+usersRouter.get('/logout', cors.corsWithOptions, (req, res, next) => {
   if (!req.session) {
     return httpResponseHandler(res, 403, 'You are not logged in')
   }
@@ -59,7 +58,7 @@ users.get('/logout', cors.corsWithOptions, (req, res, next) => {
   res.redirect('/')
 })
 
-users.get('/facebook/token', passport.authenticate('facebook-token'), (req, res) => {
+usersRouter.get('/facebook/token', passport.authenticate('facebook-token'), (req, res) => {
   const { user } = req
   if (!user) {
     return httpResponseHandler(res, 403, 'You are not authorized to login through Facebook')
@@ -70,4 +69,4 @@ users.get('/facebook/token', passport.authenticate('facebook-token'), (req, res)
   return httpResponseHandler(res, 200, 'You are logged in!', { token })
 })
 
-module.exports = users
+module.exports = usersRouter

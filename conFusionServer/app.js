@@ -1,6 +1,4 @@
 const express = require('express')
-const createError = require('http-errors')
-const path = require('path')
 const logger = require('morgan')
 const mongoose = require('mongoose')
 const passport = require('passport')
@@ -12,12 +10,13 @@ const fs = require('fs')
 const dotenv = require('dotenv')
 dotenv.config()
 
-const indexRouter = require('./src/api/index')
-const users = require('./src/api/users')
-const dishes = require('./src/api/dishes')
-const promotions = require('./src/api/promotions')
-const leaders = require('./src/api/leaders')
+const usersRouter = require('./src/api/users')
+const dishesRouter = require('./src/api/dishes')
+const promotionsRouter = require('./src/api/promotions')
+const leadersRouter = require('./src/api/leaders')
 const uploadRouter = require('./src/api/upload')
+const favoritesRouter = require('./src/api/favorites')
+
 const normalizePort = require('./src/utils/normalizePort')
 const onListening = require('./src/utils/onListening')
 const onError = require('./src/utils/onError')
@@ -32,7 +31,6 @@ connection
 .catch((err) => {
   console.log(err)
 })
-
 
 const PORT = normalizePort(process.env.PORT)
 const SECURE_PORT = normalizePort(process.env.SECURE_PORT)
@@ -76,12 +74,13 @@ app.use(express.urlencoded({ extended: false }))
 
 app.use(passport.initialize())
 
-app.use('/', indexRouter)
-app.use('/users', users)
+app.use('/users', usersRouter)
 
-app.use('/dishes', dishes)
-app.use('/promotions', promotions)
-app.use('/leaders', leaders)
+app.use('/dishes', dishesRouter)
+app.use('/promotions', promotionsRouter)
+app.use('/leaders', leadersRouter)
 app.use('/imageUpload', uploadRouter)
+
+app.use('/favorites', favoritesRouter)
 
 module.exports = app
